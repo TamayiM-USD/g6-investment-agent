@@ -293,3 +293,159 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"Error: {e}")
             print("\nNote: Free tier has 25 requests/day limit")
+
+
+class FREDClient:
+    """FRED API client for economic indicators - Real API only"""
+    
+    def __init__(self, api_key: Optional[str] = None):
+        import os
+        self.api_key = api_key or os.getenv("FRED_API_KEY")
+        if not self.api_key:
+            raise ValueError(
+                "FRED API key required. "
+                "Set FRED_API_KEY environment variable. "
+                "Get free key at: https://fred.stlouisfed.org/docs/api/api_key.html"
+            )
+        self.base_url = "https://api.stlouisfed.org/fred/series/observations"
+        self.name = "FRED"
+    
+    def get_economic_indicator(self, series_id: str, limit: int = 12) -> Dict[str, Any]:
+        """
+        Fetch economic indicator data from FRED
+        Real API call - requires valid key
+        
+        Common series:
+        - DFF: Federal Funds Rate
+        - UNRATE: Unemployment Rate
+        - CPIAUCSL: Consumer Price Index
+        - GDP: Gross Domestic Product
+        """
+        import requests
+        
+        try:
+            params = {
+                "series_id": series_id,
+                "api_key": self.api_key,
+                "file_type": "json",
+                "limit": limit,
+                "sort_order": "desc"
+            }
+            
+            response = requests.get(self.base_url, params=params, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            
+            if "error_code" in data:
+                raise RuntimeError(f"FRED API Error: {data.get('error_message', 'Unknown error')}")
+            
+            observations = data.get("observations", [])
+            if not observations:
+                raise RuntimeError(f"No data available for series {series_id}")
+            
+            # Get series metadata
+            series_info = self._get_series_info(series_id)
+            
+            return {
+                "series_id": series_id,
+                "name": series_info["name"],
+                "units": series_info["units"],
+                "frequency": series_info["frequency"],
+                "observations": [
+                    {
+                        "date": obs.get("date"),
+                        "value": obs.get("value"),
+                        "is_current": i == 0
+                    }
+                    for i, obs in enumerate(observations)
+                ],
+                "latest_value": observations[0].get("value") if observations else None,
+                "latest_date": observations[0].get("date") if observations else None,
+                "data_points": len(observations)
+            }
+            
+        except requests.exceptions.RequestException as e:
+            raise RuntimeError(f"Network error fetching FRED data: {str(e)}")
+    
+    def _get_series_info(self, series_id: str) -> Dict[str, str]:
+        """Get metadata about a series"""
+        series_map = {
+            "DFF": {
+                "name": "Federal Funds Effective Rate",
+                "units": "Percent",
+                "frequency": "Daily"
+            },
+            "UNRATE": {
+                "name": "Unemployment Rate",
+                "units": "Percent",
+                "frequency": "Monthly"
+            },
+            "CPIAUCSL": {
+                "name": "Consumer Price Index for All Urban Consumers",
+                "units": "Index 1982-1984=100",
+                "frequency": "Monthly"
+            },
+            "GDP": {
+                "name": "Gross Domestic Product",
+                "units": "Billions of Dollars",
+                "frequency": "Quarterly"
+            },
+            "MORTGAGE30US": {
+                "name": "30-Year Fixed Rate Mortgage Average",
+                "units": "Percent",
+                "frequency": "Weekly"
+            }
+        }
+        
+        return series_map.get(series_id, {
+            "name": series_id,
+            "units": "See FRED documentation",
+            "frequency": "Varies"
+        })
+    
+    def get_multiple_indicators(self, series_ids: List[str]) -> Dict[str, Any]:
+        """Fetch multiple economic indicators"""
+        results = {}
+        
+        for series_id in series_ids:
+            try:
+                results[series_id] = self.get_economic_indicator(series_id, limit=5)
+            except Exception as e:
+                results[series_id] = {"error": str(e)}
+        
+        return results
+
+
+if __name__ == "__main__":
+    import os
+    
+    print("\nTesting FRED Client...")
+    print("="*50)
+    
+    if not os.getenv("FRED_API_KEY"):
+        print("FRED_API_KEY not set")
+        print("Get free key: https://fred.stlouisfed.org/docs/api/api_key.html")
+        print("Then set: export FRED_API_KEY=your-key")
+    else:
+        try:
+            client = FREDClient()
+            
+            print("\n1. Testing Federal Funds Rate...")
+            dff = client.get_economic_indicator("DFF")
+            print(f"{dff['name']}")
+            print(f"Latest: {dff['latest_value']}% ({dff['latest_date']})")
+            
+            print("\n2. Testing Unemployment Rate...")
+            unrate = client.get_economic_indicator("UNRATE")
+            print(f"{unrate['name']}")
+            print(f"Latest: {unrate['latest_value']}% ({unrate['latest_date']})")
+            
+            print("\n3. Testing Multiple Indicators...")
+            multi = client.get_multiple_indicators(["DFF", "UNRATE", "GDP"])
+            print(f"Fetched {len([k for k, v in multi.items() if 'error' not in v])} indicators")
+            
+            print("\n" + "="*50)
+            print("FRED Client: READY ✓")
+            
+        except Exception as e:
+            print(f"Error: {e}")
