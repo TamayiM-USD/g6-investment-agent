@@ -449,3 +449,125 @@ if __name__ == "__main__":
             
         except Exception as e:
             print(f"Error: {e}")
+
+
+class SECEdgarClient:
+    """SEC EDGAR API client for regulatory filings"""
+    
+    def __init__(self):
+        self.base_url = "https://data.sec.gov"
+        self.name = "SEC EDGAR"
+        self.headers = {
+            "User-Agent": "Universit of San Diego AAI-520 Research tmlanda@sandiego.edu",
+            "Accept-Encoding": "gzip, deflate",
+            "Host": "data.sec.gov"
+        }
+    
+    def get_company_submissions(self, ticker: str) -> Dict[str, Any]:
+        """
+        Get company CIK and recent filings
+        Real SEC EDGAR API call
+        """
+        import requests
+        
+        try:
+            # First, get CIK from ticker
+            cik = self._get_cik_from_ticker(ticker)
+            if not cik:
+                raise RuntimeError(f"Could not find CIK for ticker {ticker}")
+            
+            # Fetch submissions
+            url = f"{self.base_url}/submissions/CIK{cik}.json"
+            response = requests.get(url, headers=self.headers, timeout=15)
+            response.raise_for_status()
+            data = response.json()
+            
+            # Extract recent filings
+            recent_filings = data.get("filings", {}).get("recent", {})
+            
+            filings_list = []
+            if recent_filings:
+                forms = recent_filings.get("form", [])
+                dates = recent_filings.get("filingDate", [])
+                accessions = recent_filings.get("accessionNumber", [])
+                
+                for i in range(min(10, len(forms))):
+                    filings_list.append({
+                        "form_type": forms[i],
+                        "filing_date": dates[i],
+                        "accession_number": accessions[i],
+                        "url": f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={cik}&type={forms[i]}&dateb=&owner=exclude"
+                    })
+            
+            return {
+                "ticker": ticker,
+                "cik": cik,
+                "company_name": data.get("name", ""),
+                "sic": data.get("sic", ""),
+                "sic_description": data.get("sicDescription", ""),
+                "recent_filings": filings_list,
+                "total_filings": len(forms) if forms else 0
+            }
+            
+        except requests.exceptions.RequestException as e:
+            raise RuntimeError(f"Failed to fetch SEC data: {str(e)}")
+    
+    def _get_cik_from_ticker(self, ticker: str) -> Optional[str]:
+        """Get CIK number from ticker symbol"""
+        import requests
+        
+        try:
+            # Use SEC company tickers endpoint
+            url = f"{self.base_url}/files/company_tickers.json"
+            response = requests.get(url, headers=self.headers, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            
+            # Search for ticker
+            ticker_upper = ticker.upper()
+            for item in data.values():
+                if item.get("ticker", "").upper() == ticker_upper:
+                    cik = str(item.get("cik_str", "")).zfill(10)
+                    return cik
+            
+            return None
+            
+        except Exception as e:
+            print(f"Warning: Could not fetch CIK mapping: {e}")
+            return None
+    
+    def get_filing_content(self, accession_number: str, cik: str) -> str:
+        """
+        Get the text content of a specific filing
+        Note: Returns URL - parsing full filing is complex
+        """
+        accession_no_dashes = accession_number.replace("-", "")
+        url = f"https://www.sec.gov/cgi-bin/viewer?action=view&cik={cik}&accession_number={accession_number}"
+        return url
+
+
+if __name__ == "__main__":
+    print("\nTesting SEC EDGAR Client...")
+    print("="*50)
+    
+    try:
+        client = SECEdgarClient()
+        
+        print("\n1. Testing get_company_submissions('AAPL')...")
+        submissions = client.get_company_submissions("AAPL")
+        print(f"Company: {submissions['company_name']}")
+        print(f"CIK: {submissions['cik']}")
+        print(f"Total filings: {submissions['total_filings']}")
+        print(f"Recent filings: {len(submissions['recent_filings'])}")
+        
+        if submissions['recent_filings']:
+            latest = submissions['recent_filings'][0]
+            print(f"  Latest: {latest['form_type']} on {latest['filing_date']}")
+        
+        print("\n" + "="*50)
+        print("SEC EDGAR Client: READY ✓")
+        print("\nNote: SEC enforces rate limits (10 requests/second)")
+        
+    except Exception as e:
+        print(f"Error: {e}")
+        print("\nNote: Ensure proper User-Agent header is set")
