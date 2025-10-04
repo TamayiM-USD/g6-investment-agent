@@ -1,5 +1,6 @@
 import yfinance as yf
 from typing import Dict, Any, List, Optional
+from cache_manager import cache_response
 
 
 class YahooFinanceClient:
@@ -8,6 +9,7 @@ class YahooFinanceClient:
     def __init__(self):
         self.name = "Yahoo Finance"
     
+    @cache_response("Yahoo Finance")
     def get_stock_info(self, symbol: str) -> Dict[str, Any]:
         """
         Fetch comprehensive stock information
@@ -52,6 +54,7 @@ class YahooFinanceClient:
         except Exception as e:
             raise RuntimeError(f"Failed to fetch data for {symbol}: {str(e)}")
     
+    @cache_response("Yahoo Finance")
     def get_news(self, symbol: str, limit: int = 5) -> List[Dict[str, Any]]:
         """
         Fetch recent news articles
@@ -79,6 +82,7 @@ class YahooFinanceClient:
         except Exception as e:
             raise RuntimeError(f"Failed to fetch news for {symbol}: {str(e)}")
     
+    @cache_response("Yahoo Finance")
     def get_historical_data(self, symbol: str, period: str = "1mo") -> Dict[str, Any]:
         """
         Fetch historical price data
@@ -164,6 +168,7 @@ class AlphaVantageClient:
         self.base_url = "https://www.alphavantage.co/query"
         self.name = "Alpha Vantage"
     
+    @cache_response("Alpha Vantage", ttl=86400)  # 24 hours to maximize 25/day limit
     def get_company_overview(self, symbol: str) -> Dict[str, Any]:
         """
         Get comprehensive company fundamentals
@@ -224,6 +229,7 @@ class AlphaVantageClient:
         except requests.exceptions.RequestException as e:
             raise RuntimeError(f"Network error fetching data from Alpha Vantage: {str(e)}")
     
+    @cache_response("Alpha Vantage", ttl=86400)  # 24 hours to maximize 25/day limit
     def get_quote(self, symbol: str) -> Dict[str, Any]:
         """Get real-time quote data"""
         import requests
@@ -310,11 +316,12 @@ class FREDClient:
         self.base_url = "https://api.stlouisfed.org/fred/series/observations"
         self.name = "FRED"
     
+    @cache_response("FRED", ttl=604800)  # 7 days - economic data updates slowly
     def get_economic_indicator(self, series_id: str, limit: int = 12) -> Dict[str, Any]:
         """
         Fetch economic indicator data from FRED
         Real API call - requires valid key
-        
+
         Common series:
         - DFF: Federal Funds Rate
         - UNRATE: Unemployment Rate
@@ -463,6 +470,7 @@ class SECEdgarClient:
             "Host": "data.sec.gov"
         }
     
+    @cache_response("SEC EDGAR", ttl=2592000)  # 30 days - filings are historical
     def get_company_submissions(self, ticker: str) -> Dict[str, Any]:
         """
         Get company CIK and recent filings

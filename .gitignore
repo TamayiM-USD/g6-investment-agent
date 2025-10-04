@@ -5,6 +5,9 @@
 __pycache__/
 *.pyc
 
+# Ignore API response cache
+.api_cache/
+
 # Ignore virtual environment
 .venv/
 
