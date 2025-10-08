@@ -228,3 +228,281 @@ if __name__ == "__main__":
         print("  1. OPENAI_API_KEY is set")
         print("  2. API key is valid")
         print("  3. You have API credits")
+
+
+class FundamentalsAgent:
+    """
+    Agent specialized in fundamental analysis using LLMs
+    
+    Analyzes:
+    - Profitability (margins, ROE)
+    - Growth potential
+    - Financial health
+    - Competitive position
+    """
+    
+    def __init__(self, llm_client: Optional[OpenAI] = None):
+        self.name = "Fundamentals Agent"
+        
+        if llm_client is None:
+            api_key = os.getenv("OPENAI_API_KEY")
+            if not api_key:
+                raise ValueError("OpenAI API key required")
+            self.llm = OpenAI(api_key=api_key)
+        else:
+            self.llm = llm_client
+        
+        print(f"{self.name} initialized with LLM")
+    
+    def analyze(self, symbol: str, data: Dict[str, Any]) -> AnalysisResult:
+        """Analyze fundamental data using LLM"""
+        print(f"\n[{self.name}] Analyzing {symbol} fundamentals with LLM...")
+        
+        prompt = self._create_fundamentals_prompt(symbol, data)
+        
+        try:
+            response = self.llm.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an expert fundamental analyst. Provide analysis in valid JSON format."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.7,
+                max_tokens=500,
+                response_format={"type": "json_object"}
+            )
+            
+            llm_analysis = response.choices[0].message.content
+            findings = json.loads(llm_analysis)
+            
+            print(f"  Fundamentals analysis complete")
+            
+            return AnalysisResult(
+                agent_name=self.name,
+                timestamp=datetime.now().isoformat(),
+                data_source="Yahoo Finance + Alpha Vantage + OpenAI",
+                findings=findings,
+                confidence_score=0.82,
+                recommendations=findings.get("recommendations", []),
+                llm_reasoning=llm_analysis
+            )
+            
+        except Exception as e:
+            print(f"  Error: {e}")
+            raise
+    
+    def _create_fundamentals_prompt(self, symbol: str, data: Dict[str, Any]) -> str:
+        """Create prompt for fundamental analysis"""
+        
+        company = data.get('company_name', 'N/A')
+        revenue = data.get('revenue', 0)
+        profit_margin = data.get('profit_margin', 0)
+        operating_margin = data.get('operating_margin', 0)
+        earnings_growth = data.get('earnings_growth', 0)
+        pe_ratio = data.get('pe_ratio', 'N/A')
+        forward_pe = data.get('forward_pe', 'N/A')
+        debt_to_equity = data.get('debt_to_equity', 'N/A')
+        roe = data.get('return_on_equity', 'N/A')
+        
+        return f"""
+Analyze the fundamental financial health of this company:
+
+COMPANY: {symbol} - {company}
+
+PROFITABILITY:
+Revenue (TTM): ${revenue:,}
+Profit Margin: {profit_margin:.2%} if profit_margin else "N/A"
+Operating Margin: {operating_margin:.2%} if operating_margin else "N/A"
+Return on Equity: {roe}
+
+VALUATION:
+PE Ratio (Trailing): {pe_ratio}
+PE Ratio (Forward): {forward_pe}
+
+GROWTH:
+Earnings Growth: {earnings_growth:.2%} if earnings_growth else "N/A"
+
+FINANCIAL STRENGTH:
+Debt-to-Equity: {debt_to_equity}
+
+Provide JSON analysis:
+{{
+    "profitability_assessment": "strong/moderate/weak with detailed explanation",
+    "growth_potential": "high/moderate/low with reasoning and growth trajectory",
+    "financial_health": "excellent/good/fair/poor with balance sheet analysis",
+    "competitive_position": "market leader/strong/average/weak with reasoning",
+    "valuation_summary": "analysis of PE ratios and valuation metrics",
+    "key_strengths": ["strength 1", "strength 2", "strength 3"],
+    "key_concerns": ["concern 1", "concern 2"],
+    "recommendations": ["actionable recommendation 1", "recommendation 2", "recommendation 3"]
+}}
+
+Be specific and data-driven.
+"""
+
+
+class EconomicContextAgent:
+    """
+    Agent specialized in economic context analysis using LLMs
+    
+    Analyzes:
+    - Interest rate impact
+    - Employment conditions
+    - Sector outlook
+    - Macroeconomic risks
+    """
+    
+    def __init__(self, llm_client: Optional[OpenAI] = None):
+        self.name = "Economic Context Agent"
+        
+        if llm_client is None:
+            api_key = os.getenv("OPENAI_API_KEY")
+            if not api_key:
+                raise ValueError("OpenAI API key required")
+            self.llm = OpenAI(api_key=api_key)
+        else:
+            self.llm = llm_client
+        
+        print(f"{self.name} initialized with LLM")
+    
+    def analyze(self, sector: str, economic_data: Dict[str, Any]) -> AnalysisResult:
+        """Analyze economic context using LLM"""
+        print(f"\n[{self.name}] Analyzing {sector} sector economic context...")
+        
+        prompt = self._create_economic_prompt(sector, economic_data)
+        
+        try:
+            response = self.llm.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an expert macroeconomic analyst. Provide analysis in valid JSON format."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.7,
+                max_tokens=500,
+                response_format={"type": "json_object"}
+            )
+            
+            llm_analysis = response.choices[0].message.content
+            findings = json.loads(llm_analysis)
+            
+            print(f"  Economic analysis complete")
+            
+            return AnalysisResult(
+                agent_name=self.name,
+                timestamp=datetime.now().isoformat(),
+                data_source="FRED + OpenAI",
+                findings=findings,
+                confidence_score=0.85,
+                recommendations=findings.get("recommendations", []),
+                llm_reasoning=llm_analysis
+            )
+            
+        except Exception as e:
+            print(f"  Error: {e}")
+            raise
+    
+    def _create_economic_prompt(self, sector: str, data: Dict[str, Any]) -> str:
+        """Create prompt for economic analysis"""
+        
+        fed_rate = data.get('fed_funds_rate', 'N/A')
+        unemployment = data.get('unemployment_rate', 'N/A')
+        cpi = data.get('cpi', 'N/A')
+        gdp_growth = data.get('gdp_growth', 'N/A')
+        
+        return f"""
+Analyze how current macroeconomic conditions affect the {sector} sector:
+
+ECONOMIC INDICATORS:
+Federal Funds Rate: {fed_rate}%
+Unemployment Rate: {unemployment}%
+CPI (Inflation): {cpi}
+GDP Growth: {gdp_growth}
+
+TARGET SECTOR: {sector}
+
+Provide JSON analysis:
+{{
+    "interest_rate_impact": "positive/negative/neutral with detailed explanation of rate effects on {sector}",
+    "employment_impact": "analysis of how employment trends affect {sector} demand and operations",
+    "inflation_impact": "how inflation affects {sector} costs, pricing power, and margins",
+    "sector_outlook": "favorable/neutral/challenging with 3-6 month outlook for {sector}",
+    "cyclical_analysis": "where we are in economic cycle and {sector} positioning",
+    "key_risks": ["macroeconomic risk 1", "risk 2", "risk 3"],
+    "key_opportunities": ["opportunity 1", "opportunity 2"],
+    "recommendations": ["sector-specific recommendation 1", "recommendation 2", "recommendation 3"]
+}}
+
+Focus on sector-specific impacts. Be specific about transmission mechanisms.
+"""
+
+
+if __name__ == "__main__":
+    import sys
+    
+    print("\nTesting Additional LLM Agents...")
+    print("="*60)
+    
+    if not os.getenv("OPENAI_API_KEY"):
+        print("OPENAI_API_KEY not set")
+        sys.exit(1)
+    
+    # Test Fundamentals Agent
+    print("\n1. Testing Fundamentals Agent...")
+    try:
+        fund_agent = FundamentalsAgent()
+        
+        test_data = {
+            "company_name": "Apple Inc.",
+            "revenue": 385000000000,
+            "profit_margin": 0.25,
+            "operating_margin": 0.30,
+            "earnings_growth": 0.08,
+            "pe_ratio": 28.5,
+            "forward_pe": 26.0,
+            "return_on_equity": 0.45,
+            "debt_to_equity": 1.5
+        }
+        
+        result = fund_agent.analyze("AAPL", test_data)
+        print(f"  Analysis complete")
+        print(f"    Findings: {len(result.findings)} metrics")
+        print(f"    Recommendations: {len(result.recommendations)}")
+        
+    except Exception as e:
+        print(f"  Error: {e}")
+    
+    # Test Economic Agent
+    print("\n2. Testing Economic Context Agent...")
+    try:
+        econ_agent = EconomicContextAgent()
+        
+        econ_data = {
+            "fed_funds_rate": 5.33,
+            "unemployment_rate": 3.8,
+            "cpi": 310.5,
+            "gdp_growth": 2.5
+        }
+        
+        result = econ_agent.analyze("Technology", econ_data)
+        print(f"  Analysis complete")
+        print(f"    Sector: Technology")
+        print(f"    Recommendations: {len(result.recommendations)}")
+        
+    except Exception as e:
+        print(f"  Error: {e}")
+    
+    print("\n" + "="*60)
+    print("Additional LLM Agents: WORKING!")
