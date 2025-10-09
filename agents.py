@@ -506,3 +506,102 @@ if __name__ == "__main__":
     
     print("\n" + "="*60)
     print("Additional LLM Agents: WORKING!")
+
+
+class RegulatoryAgent:
+    """
+    Agent specialized in regulatory compliance analysis
+    Simpler agent - uses structured data without LLM
+    """
+    
+    def __init__(self):
+        self.name = "Regulatory Agent"
+        print(f"{self.name} initialized")
+    
+    def analyze(self, symbol: str, filings_data: Dict[str, Any]) -> AnalysisResult:
+        """Analyze regulatory filings"""
+        print(f"\n[{self.name}] Analyzing regulatory status for {symbol}...")
+        
+        # Extract filing information
+        recent_filings = filings_data.get("recent_filings", [])
+        total_filings = filings_data.get("total_filings", 0)
+        cik = filings_data.get("cik", "Unknown")
+        
+        # Analyze compliance
+        findings = {
+            "cik": cik,
+            "total_filings": total_filings,
+            "recent_filings_count": len(recent_filings),
+            "filing_types": list(set([f.get("form_type", "") for f in recent_filings[:10]])),
+            "latest_filing": recent_filings[0] if recent_filings else None,
+            "compliance_status": "Current" if recent_filings else "Unknown"
+        }
+        
+        # Generate recommendations
+        recommendations = [
+            f"Company maintains {findings['compliance_status']} SEC filings (CIK: {cik})",
+            f"Total filings on record: {total_filings}",
+            "Review recent 10-K for annual details",
+            "Review recent 10-Q for quarterly updates"
+        ]
+        
+        if findings["latest_filing"]:
+            latest = findings["latest_filing"]
+            recommendations.insert(0, 
+                f"Latest filing: {latest.get('form_type')} on {latest.get('filing_date')}"
+            )
+        
+        print(f"  Regulatory analysis complete")
+        print(f"    Status: {findings['compliance_status']}")
+        
+        return AnalysisResult(
+            agent_name=self.name,
+            timestamp=datetime.now().isoformat(),
+            data_source="SEC EDGAR",
+            findings=findings,
+            confidence_score=0.70,
+            recommendations=recommendations,
+            llm_reasoning="Structured analysis of SEC filings data"
+        )
+
+
+# Test all agents
+if __name__ == "__main__":
+    print("\nTesting All Agents...")
+    print("="*60)
+    
+    if not os.getenv("OPENAI_API_KEY"):
+        print("OPENAI_API_KEY not set - LLM agents will fail")
+        print("Regulatory agent will work (doesn't use LLM)")
+    
+    # Test Regulatory Agent (no LLM needed)
+    print("\n3. Testing Regulatory Agent (no LLM)...")
+    try:
+        reg_agent = RegulatoryAgent()
+        
+        test_filings = {
+            "cik": "0000320193",
+            "total_filings": 1250,
+            "recent_filings": [
+                {"form_type": "10-K", "filing_date": "2024-10-25"},
+                {"form_type": "10-Q", "filing_date": "2024-07-28"},
+                {"form_type": "8-K", "filing_date": "2024-06-15"}
+            ]
+        }
+        
+        result = reg_agent.analyze("AAPL", test_filings)
+        print(f"  Analysis complete")
+        print(f"    CIK: {result.findings['cik']}")
+        print(f"    Status: {result.findings['compliance_status']}")
+        
+    except Exception as e:
+        print(f"  Error: {e}")
+    
+    print("\n" + "="*60)
+    print("ALL 4 SPECIALIZED AGENTS COMPLETE!")
+    print("="*60)
+    print("\nAgents created:")
+    print("  1. MarketDataAgent (LLM)")
+    print("  2. FundamentalsAgent (LLM)")
+    print("  3. EconomicContextAgent (LLM)")
+    print("  4. RegulatoryAgent (Structured)")
