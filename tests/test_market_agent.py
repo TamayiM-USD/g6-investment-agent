@@ -6,6 +6,9 @@ import os
 import sys
 sys.path.append('..')
 
+from dotenv import load_dotenv
+load_dotenv() 
+
 from agents import MarketDataAgent
 from data_models import AnalysisResult
 
