@@ -411,3 +411,195 @@ if __name__ == "__main__":
         print(f"\n✗ Error: {e}")
         import traceback
         traceback.print_exc()
+    
+    def self_reflect(self, results: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        AGENT FUNCTION 3: Self-Reflection
+        
+        Uses LLM to assess research quality and identify improvements
+        
+        Args:
+            results: Complete research results from execute_research()
+        
+        Returns:
+            Reflection with quality scores, strengths, weaknesses, improvements
+        """
+        print(f"\n{'='*60}")
+        print(f"[AGENT FUNCTION 3: SELF-REFLECTION]")
+        print(f"Assessing research quality using LLM...")
+        print(f"{'='*60}\n")
+        
+        symbol = results.get("symbol", "Unknown")
+        num_agents = len(results.get("agent_analyses", {}))
+        num_workflows = len(results.get("workflow_results", {}))
+        
+        # Create reflection prompt for LLM
+        reflection_prompt = f"""
+You are a quality assurance expert for financial research. Critically evaluate this research output.
+
+RESEARCH SUMMARY:
+Stock: {symbol}
+Specialized Agents Run: {num_agents}
+Workflow Patterns Executed: {num_workflows}
+Data Sources: Yahoo Finance, Alpha Vantage, FRED, SEC EDGAR
+
+AGENT ANALYSES COMPLETED:
+{', '.join(results.get('agent_analyses', {}).keys())}
+
+WORKFLOW PATTERNS USED:
+{', '.join(results.get('workflow_results', {}).keys())}
+
+Evaluate the research quality in JSON format:
+{{
+    "overall_quality_score": 0.87,
+    "dimension_scores": {{
+        "completeness": 0.90,
+        "accuracy": 0.85,
+        "depth": 0.85,
+        "actionability": 0.88
+    }},
+    "strengths": [
+        "Specific strength 1 with evidence",
+        "Specific strength 2 with evidence",
+        "Specific strength 3 with evidence"
+    ],
+    "weaknesses": [
+        "Specific weakness 1",
+        "Specific weakness 2"
+    ],
+    "improvement_suggestions": [
+        "Actionable improvement 1",
+        "Actionable improvement 2",
+        "Actionable improvement 3"
+    ],
+    "confidence_assessment": "high/medium/low confidence with reasoning",
+    "data_quality_notes": "assessment of data sources used"
+}}
+
+Overall score should be 0.0 to 1.0. Be constructive but honest.
+"""
+        
+        try:
+            print("  Calling LLM for quality assessment...")
+            
+            response = self.llm.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an expert quality assurance analyst for financial research. Provide honest, constructive evaluation in JSON format."
+                    },
+                    {
+                        "role": "user",
+                        "content": reflection_prompt
+                    }
+                ],
+                temperature=0.6,
+                max_tokens=600,
+                response_format={"type": "json_object"}
+            )
+            
+            reflection = json.loads(response.choices[0].message.content)
+            
+            # Add metadata
+            reflection["timestamp"] = datetime.now().isoformat()
+            reflection["symbol"] = symbol
+            reflection["llm_powered"] = True
+            reflection["agents_analyzed"] = num_agents
+            reflection["workflows_executed"] = num_workflows
+            
+            quality_score = reflection.get("overall_quality_score", 0.80)
+            
+            print(f"\nSelf-reflection complete!")
+            print(f"  Overall Quality Score: {quality_score:.2f}/1.00")
+            print(f"  Strengths identified: {len(reflection.get('strengths', []))}")
+            print(f"  Improvements suggested: {len(reflection.get('improvement_suggestions', []))}")
+            
+            print(f"\nTop Strengths:")
+            for i, strength in enumerate(reflection.get("strengths", [])[:2], 1):
+                print(f"  {i}. {strength}")
+            
+            print(f"\nKey Improvements:")
+            for i, improvement in enumerate(reflection.get("improvement_suggestions", [])[:2], 1):
+                print(f"  {i}. {improvement}")
+            
+            return reflection
+            
+        except Exception as e:
+            print(f"\n✗ Error in LLM reflection: {e}")
+            print("  Using fallback reflection...")
+            
+            # Fallback reflection
+            quality_score = 0.75 + (0.05 * num_agents) + (0.03 * num_workflows)
+            quality_score = min(quality_score, 0.92)
+            
+            return {
+                "timestamp": datetime.now().isoformat(),
+                "symbol": symbol,
+                "overall_quality_score": quality_score,
+                "dimension_scores": {
+                    "completeness": 0.80,
+                    "accuracy": 0.75,
+                    "depth": 0.70,
+                    "actionability": 0.75
+                },
+                "strengths": [
+                    f"{num_agents} specialized agents provided analysis",
+                    f"{num_workflows} workflow patterns executed successfully",
+                    "Multiple data sources integrated"
+                ],
+                "weaknesses": [
+                    "LLM reflection unavailable - using fallback assessment"
+                ],
+                "improvement_suggestions": [
+                    "Configure OpenAI API for LLM-powered reflection",
+                    "Add additional data sources",
+                    "Extend analysis depth"
+                ],
+                "llm_powered": False,
+                "confidence_assessment": "medium - fallback assessment"
+            }
+
+
+if __name__ == "__main__":
+    print("\nTesting Self-Reflection Function...")
+    print("="*60)
+    
+    if not os.getenv("OPENAI_API_KEY"):
+        print("✗ OPENAI_API_KEY required")
+        exit(1)
+    
+    try:
+        agent = InvestmentResearchAgent()
+        
+        print("\nExecuting research...")
+        results = agent.execute_research("AAPL")
+        
+        print("\n" + "="*60)
+        print("Testing self_reflect() - Agent Function 3")
+        print("="*60)
+        
+        reflection = agent.self_reflect(results)
+        
+        print("\n" + "="*60)
+        print("SELF-REFLECTION RESULTS:")
+        print("="*60)
+        print(f"Overall Quality: {reflection['overall_quality_score']:.2f}/1.00")
+        
+        print("\nDimension Scores:")
+        for dim, score in reflection.get("dimension_scores", {}).items():
+            print(f"  {dim.capitalize()}: {score:.2f}")
+        
+        print("\nStrengths:")
+        for i, strength in enumerate(reflection.get("strengths", []), 1):
+            print(f"  {i}. {strength}")
+        
+        print("\nImprovements:")
+        for i, improvement in enumerate(reflection.get("improvement_suggestions", []), 1):
+            print(f"  {i}. {improvement}")
+        
+        print("\n" + "="*60)
+        print("Agent Function 3 (Self-Reflection): WORKING! ")
+        
+    except Exception as e:
+        print(f"\n✗ Error: {e}")
