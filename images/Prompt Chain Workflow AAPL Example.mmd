@@ -1,0 +1,10 @@
+graph TD
+    A[Raw AAPL Data:<br/>Price: $175.43, PE: 28.5] -->|Ingest| B[Data Received]
+    B -->|Preprocess| C[Structured:<br/>market_data, fundamentals]
+    C -->|Classify| D[Categories:<br/>✓ Market ✓ Fundamentals]
+    D -->|LLM Extract| E[Insights:<br/>1. Strong upward trend<br/>2. Premium valuation<br/>3. High market cap]
+    E -->|LLM Summarize| F[Summary:<br/>AAPL shows bullish momentum<br/>with premium valuation.<br/>Consider growth potential.]
+    
+    style D fill:#fff4e6
+    style E fill:#fff4e6
+    style F fill:#e8f5e9

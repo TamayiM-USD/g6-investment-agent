@@ -1,0 +1,91 @@
+stateDiagram-v2
+    [*] --> Initialization
+    
+    Initialization --> Planning: User requests analysis
+    
+    state Planning {
+        [*] --> CheckMemory
+        CheckMemory --> GeneratePlan: No past analysis
+        CheckMemory --> LoadPast: Found past analysis
+        LoadPast --> GeneratePlan: Incorporate learnings
+        GeneratePlan --> [*]: Plan ready
+    }
+    
+    Planning --> DataCollection
+    
+    state DataCollection {
+        [*] --> FetchAPIs
+        FetchAPIs --> Yahoo
+        FetchAPIs --> AlphaVantage
+        FetchAPIs --> FRED
+        FetchAPIs --> SEC
+        Yahoo --> [*]
+        AlphaVantage --> [*]
+        FRED --> [*]
+        SEC --> [*]
+    }
+    
+    DataCollection --> AgentExecution
+    
+    state AgentExecution {
+        [*] --> ParallelAgents
+        ParallelAgents --> MarketAgent
+        ParallelAgents --> FundamentalsAgent
+        ParallelAgents --> EconomicAgent
+        ParallelAgents --> RegulatoryAgent
+        MarketAgent --> Aggregate
+        FundamentalsAgent --> Aggregate
+        EconomicAgent --> Aggregate
+        RegulatoryAgent --> Aggregate
+        Aggregate --> [*]
+    }
+    
+    AgentExecution --> WorkflowExecution
+    
+    state WorkflowExecution {
+        [*] --> PromptChain
+        PromptChain --> Routing
+        Routing --> Evaluator
+        Evaluator --> [*]
+    }
+    
+    WorkflowExecution --> SelfReflection
+    
+    state SelfReflection {
+        [*] --> EvaluateQuality
+        EvaluateQuality --> ScoreDimensions
+        ScoreDimensions --> IdentifyGaps
+        IdentifyGaps --> SuggestImprovements
+        SuggestImprovements --> [*]
+    }
+    
+    SelfReflection --> Learning
+    
+    state Learning {
+        [*] --> ExtractInsights
+        ExtractInsights --> StoreMemory
+        StoreMemory --> UpdateQuality
+        UpdateQuality --> [*]
+    }
+    
+    Learning --> [*]: Report complete
+    
+    note right of Planning
+        LLM generates plan
+        Checks for past learnings
+    end note
+    
+    note right of AgentExecution
+        All agents run in parallel
+        Each uses LLM for reasoning
+    end note
+    
+    note right of SelfReflection
+        LLM evaluates own output
+        Scores 0.0 to 1.0
+    end note
+    
+    note right of Learning
+        Stores insights for future
+        Improves over time
+    end note

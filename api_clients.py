@@ -1,4 +1,6 @@
 import yfinance as yf
+import requests
+import re
 from typing import Dict, Any, List, Optional
 from cache_manager import cache_response
 
@@ -150,7 +152,7 @@ if __name__ == "__main__":
         print(f"Error: {e}")
     
     print("\n" + "="*50)
-    print("Yahoo Finance Client: READY ✓")
+    print("Yahoo Finance Client: READY ")
 
 
 class AlphaVantageClient:
@@ -294,7 +296,7 @@ if __name__ == "__main__":
             print(f"Change: {quote['change_percent']}")
             
             print("\n" + "="*50)
-            print("Alpha Vantage Client: READY ✓")
+            print("Alpha Vantage Client: READY ")
             
         except Exception as e:
             print(f"Error: {e}")
@@ -452,7 +454,7 @@ if __name__ == "__main__":
             print(f"Fetched {len([k for k, v in multi.items() if 'error' not in v])} indicators")
             
             print("\n" + "="*50)
-            print("FRED Client: READY ✓")
+            print("FRED Client: READY ")
             
         except Exception as e:
             print(f"Error: {e}")
@@ -465,7 +467,7 @@ class SECEdgarClient:
         self.base_url = "https://data.sec.gov"
         self.name = "SEC EDGAR"
         self.headers = {
-            "User-Agent": "Universit of San Diego AAI-520 Research tmlanda@sandiego.edu",
+            "User-Agent": "University of San Diego AAI-520 Research tmlanda@sandiego.edu",
             "Accept-Encoding": "gzip, deflate",
             "Host": "data.sec.gov"
         }
@@ -521,27 +523,63 @@ class SECEdgarClient:
             raise RuntimeError(f"Failed to fetch SEC data: {str(e)}")
     
     def _get_cik_from_ticker(self, ticker: str) -> Optional[str]:
-        """Get CIK number from ticker symbol"""
-        import requests
-        
+        """Get CIK number from ticker symbol using SEC's search API"""
+
         try:
-            # Use SEC company tickers endpoint
-            url = f"{self.base_url}/files/company_tickers.json"
-            response = requests.get(url, headers=self.headers, timeout=10)
-            response.raise_for_status()
-            data = response.json()
-            
-            # Search for ticker
+            # Use SEC's search/browse functionality
             ticker_upper = ticker.upper()
-            for item in data.values():
-                if item.get("ticker", "").upper() == ticker_upper:
-                    cik = str(item.get("cik_str", "")).zfill(10)
-                    return cik
-            
+            search_url = "https://www.sec.gov/cgi-bin/browse-edgar"
+
+            params = {
+                "action": "getcompany",
+                "company": ticker_upper,
+                "type": "",
+                "dateb": "",
+                "owner": "exclude",
+                "output": "atom",
+                "count": "1"
+            }
+
+            response = requests.get(search_url, params=params, headers=self.headers, timeout=10)
+            response.raise_for_status()
+
+            # Extract CIK from XML response
+            # Look for CIK in the response
+            cik_match = re.search(r'<CIK>(\d+)</CIK>', response.text)
+            if cik_match:
+                cik = cik_match.group(1).zfill(10)
+                return cik
+
             return None
-            
+
         except Exception as e:
-            print(f"Warning: Could not fetch CIK mapping: {e}")
+            print(f"Warning: Could not fetch CIK for {ticker}: {e}")
+
+            # Fallback: Use a hardcoded mapping for common tickers
+            # This is a last resort for well-known companies
+            common_tickers = {
+                "AAPL": "0000320193",
+                "MSFT": "0000789019",
+                "GOOGL": "0001652044",
+                "GOOG": "0001652044",
+                "AMZN": "0001018724",
+                "TSLA": "0001318605",
+                "META": "0001326801",
+                "NVDA": "0001045810",
+                "JPM": "0000019617",
+                "V": "0001403161",
+                "IBM": "0000051143",
+                "NFLX": "0001065280",
+                "DIS": "0001001039",
+                "BA": "0000012927",
+                "INTC": "0000050863"
+            }
+
+            cik = common_tickers.get(ticker.upper())
+            if cik:
+                print(f"Info: Using cached CIK for {ticker}")
+                return cik
+
             return None
     
     def get_filing_content(self, accession_number: str, cik: str) -> str:
@@ -573,7 +611,7 @@ if __name__ == "__main__":
             print(f"  Latest: {latest['form_type']} on {latest['filing_date']}")
         
         print("\n" + "="*50)
-        print("SEC EDGAR Client: READY ✓")
+        print("SEC EDGAR Client: READY ")
         print("\nNote: SEC enforces rate limits (10 requests/second)")
         
     except Exception as e:

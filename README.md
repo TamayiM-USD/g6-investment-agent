@@ -308,6 +308,64 @@ https://github.com/TamayiM-USD/g6-investment-agent
 
 ---
 
+## Academic Integrity
+This project follows the [USD Code of Honor](https://www.sandiego.edu/conduct/documents/Honor-Code.pdf).
+
+---
+
+## AI Tool Usage Disclosure
+This project uses AI-assisted tools (ChatGPT) for:
+
+- Code structure suggestions
+- Documentation enhancement
+- Troubleshooting and debugging errors
+- Best practices recommendations
+
+All AI-generated content has been:
+
+- Reviewed and understood by team members
+- Modified and adapted for project requirements
+- Properly integrated with original work
+- Attributed in code comments where applicable
+
+Team member's original contributions:
+
+- System architecture design
+- Agent specialization strategy
+  - The design of the self-evaluation mechanism follows patterns suggested by ChatGPT
+- Workflow pattern implementations
+  - With verification of ideas with LLMs and reviewing LangChain website
+- All prompts were written by hand
+  - In some cases, they were improved by LLMs to capture nuance 
+- Integration logic and error handling
+- Testing and validation procedures
+- Documentation and presentation
+
+---
+
+## Future Enhancements
+
+### Planned Features
+
+- Integration with an interactive UI
+  - A Streamlit example is included in the GitHub repository
+- Real-time data streaming integration
+- Natural language report generation
+- Portfolio-level analysis capabilities
+- Sentiment analysis from news sources
+- Technical analysis pattern recognition
+- Interactive visualization dashboard
+- REST API for web integration
+
+### Scalability
+
+- Add more specialized agents (Options, Crypto, Forex)
+- Implement caching for API responses
+- Add database for persistent storage
+- Create worker queue for parallel processing
+
+---
+
 ## License
 
 Academic use only - AAI-520 Final Project  

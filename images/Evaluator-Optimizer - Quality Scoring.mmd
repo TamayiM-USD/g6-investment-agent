@@ -1,0 +1,20 @@
+graph LR
+    subgraph "Quality Dimensions"
+        A[Analysis] --> C[Completeness<br/>0.90]
+        A --> AC[Accuracy<br/>0.85]
+        A --> D[Depth<br/>0.85]
+        A --> ACT[Actionability<br/>0.88]
+        
+        C --> OVERALL[Overall Score<br/>0.87]
+        AC --> OVERALL
+        D --> OVERALL
+        ACT --> OVERALL
+    end
+    
+    OVERALL --> DECISION{≥ 0.8?}
+    DECISION -->|Yes| ACCEPT[✓ Accept]
+    DECISION -->|No| IMPROVE[⟳ Optimize]
+    
+    style OVERALL fill:#fff4e6
+    style ACCEPT fill:#e8f5e9
+    style IMPROVE fill:#ffebee

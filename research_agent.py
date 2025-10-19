@@ -169,7 +169,7 @@ Be specific and actionable. Focus on what makes {symbol} analysis unique.
             return plan
             
         except Exception as e:
-            print(f"\n✗ Error in LLM planning: {e}")
+            print(f"\nError in LLM planning: {e}")
             print("  Using fallback plan...")
             
             return ResearchPlan(
@@ -198,44 +198,7 @@ Be specific and actionable. Focus on what makes {symbol} analysis unique.
                 ],
                 reasoning="Standard comprehensive financial analysis plan"
             )
-
-
-if __name__ == "__main__":
-    print("\nTesting Investment Research Agent - Planning Function...")
-    print("="*60)
-    
-    if not os.getenv("OPENAI_API_KEY"):
-        print("✗ OPENAI_API_KEY required")
-        exit(1)
-    
-    try:
-        # Initialize agent
-        print("\n1. Initializing agent...")
-        agent = InvestmentResearchAgent()
-        
-        # Test planning function
-        print("\n2. Testing plan_research() - Agent Function 1...")
-        plan = agent.plan_research("AAPL")
-        
-        print("\n" + "="*60)
-        print("RESEARCH PLAN GENERATED:")
-        print("="*60)
-        print(plan.summary())
-        
-        print("Objectives:")
-        for i, obj in enumerate(plan.objectives, 1):
-            print(f"  {i}. {obj}")
-        
-        print("\nAnalysis Steps:")
-        for i, step in enumerate(plan.analysis_steps, 1):
-            print(f"  {i}. {step}")
-        
-        print("\n" + "="*60)
-        print("Agent Function 1 (Planning): WORKING! ")
-        
-    except Exception as e:
-        print(f"\n✗ Error: {e}")
-    
+ 
     def execute_research(self, symbol: str) -> Dict[str, Any]:
         """
         AGENT FUNCTION 2: Tool Usage
@@ -369,49 +332,6 @@ if __name__ == "__main__":
         
         return results
 
-
-if __name__ == "__main__":
-    print("\nTesting Investment Research Agent - Execution...")
-    print("="*60)
-    
-    if not os.getenv("OPENAI_API_KEY"):
-        print("✗ OPENAI_API_KEY required")
-        exit(1)
-    
-    try:
-        agent = InvestmentResearchAgent()
-        
-        print("\n" + "="*60)
-        print("Testing execute_research() - Agent Function 2")
-        print("="*60)
-        
-        results = agent.execute_research("AAPL")
-        
-        print("\n" + "="*60)
-        print("EXECUTION RESULTS:")
-        print("="*60)
-        print(f"Symbol: {results['symbol']}")
-        print(f"Agents analyzed: {len(results['agent_analyses'])}")
-        print(f"Workflows executed: {len(results['workflow_results'])}")
-        
-        print("\nAgent Analyses:")
-        for agent_name, analysis in results['agent_analyses'].items():
-            print(f"  {agent_name}: {len(analysis.get('recommendations', []))} recommendations")
-        
-        print("\nWorkflow Results:")
-        for workflow_name in results['workflow_results'].keys():
-            print(f"  {workflow_name}")
-        
-        print("\n" + "="*60)
-        print("Agent Functions 1 & 2: WORKING! ")
-        print("  1. Planning: LLM generates research plan ")
-        print("  2. Tool Usage: Coordinates APIs and agents ")
-        
-    except Exception as e:
-        print(f"\n✗ Error: {e}")
-        import traceback
-        traceback.print_exc()
-    
     def self_reflect(self, results: Dict[str, Any]) -> Dict[str, Any]:
         """
         AGENT FUNCTION 3: Self-Reflection
@@ -526,7 +446,7 @@ Overall score should be 0.0 to 1.0. Be constructive but honest.
             return reflection
             
         except Exception as e:
-            print(f"\n✗ Error in LLM reflection: {e}")
+            print(f"\nError in LLM reflection: {e}")
             print("  Using fallback reflection...")
             
             # Fallback reflection
@@ -560,50 +480,6 @@ Overall score should be 0.0 to 1.0. Be constructive but honest.
                 "confidence_assessment": "medium - fallback assessment"
             }
 
-
-if __name__ == "__main__":
-    print("\nTesting Self-Reflection Function...")
-    print("="*60)
-    
-    if not os.getenv("OPENAI_API_KEY"):
-        print("✗ OPENAI_API_KEY required")
-        exit(1)
-    
-    try:
-        agent = InvestmentResearchAgent()
-        
-        print("\nExecuting research...")
-        results = agent.execute_research("AAPL")
-        
-        print("\n" + "="*60)
-        print("Testing self_reflect() - Agent Function 3")
-        print("="*60)
-        
-        reflection = agent.self_reflect(results)
-        
-        print("\n" + "="*60)
-        print("SELF-REFLECTION RESULTS:")
-        print("="*60)
-        print(f"Overall Quality: {reflection['overall_quality_score']:.2f}/1.00")
-        
-        print("\nDimension Scores:")
-        for dim, score in reflection.get("dimension_scores", {}).items():
-            print(f"  {dim.capitalize()}: {score:.2f}")
-        
-        print("\nStrengths:")
-        for i, strength in enumerate(reflection.get("strengths", []), 1):
-            print(f"  {i}. {strength}")
-        
-        print("\nImprovements:")
-        for i, improvement in enumerate(reflection.get("improvement_suggestions", []), 1):
-            print(f"  {i}. {improvement}")
-        
-        print("\n" + "="*60)
-        print("Agent Function 3 (Self-Reflection): WORKING! ")
-        
-    except Exception as e:
-        print(f"\n✗ Error: {e}")
-    
     def learn(self, symbol: str, results: Dict[str, Any], reflection: Dict[str, Any]):
         """
         AGENT FUNCTION 4: Learning
@@ -752,11 +628,135 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
+    print("\nTesting Investment Research Agent - Planning Function...")
+    print("="*60)
+    
+    if not os.getenv("OPENAI_API_KEY"):
+        print("OPENAI_API_KEY required")
+        exit(1)
+    
+    try:
+        # Initialize agent
+        print("\n1. Initializing agent...")
+        agent = InvestmentResearchAgent()
+        
+        # Test planning function
+        print("\n2. Testing plan_research() - Agent Function 1...")
+        plan = agent.plan_research("AAPL")
+        
+        print("\n" + "="*60)
+        print("RESEARCH PLAN GENERATED:")
+        print("="*60)
+        print(plan.summary())
+        
+        print("Objectives:")
+        for i, obj in enumerate(plan.objectives, 1):
+            print(f"  {i}. {obj}")
+        
+        print("\nAnalysis Steps:")
+        for i, step in enumerate(plan.analysis_steps, 1):
+            print(f"  {i}. {step}")
+        
+        print("\n" + "="*60)
+        print("Agent Function 1 (Planning): WORKING! ")
+        
+    except Exception as e:
+        print(f"\nError: {e}")
+   
+
+if __name__ == "__main__":
+    print("\nTesting Investment Research Agent - Execution...")
+    print("="*60)
+    
+    if not os.getenv("OPENAI_API_KEY"):
+        print("OPENAI_API_KEY required")
+        exit(1)
+    
+    try:
+        agent = InvestmentResearchAgent()
+        
+        print("\n" + "="*60)
+        print("Testing execute_research() - Agent Function 2")
+        print("="*60)
+        
+        results = agent.execute_research("AAPL")
+        
+        print("\n" + "="*60)
+        print("EXECUTION RESULTS:")
+        print("="*60)
+        print(f"Symbol: {results['symbol']}")
+        print(f"Agents analyzed: {len(results['agent_analyses'])}")
+        print(f"Workflows executed: {len(results['workflow_results'])}")
+        
+        print("\nAgent Analyses:")
+        for agent_name, analysis in results['agent_analyses'].items():
+            print(f"  {agent_name}: {len(analysis.get('recommendations', []))} recommendations")
+        
+        print("\nWorkflow Results:")
+        for workflow_name in results['workflow_results'].keys():
+            print(f"  {workflow_name}")
+        
+        print("\n" + "="*60)
+        print("Agent Functions 1 & 2: WORKING! ")
+        print("  1. Planning: LLM generates research plan ")
+        print("  2. Tool Usage: Coordinates APIs and agents ")
+        
+    except Exception as e:
+        print(f"\nError: {e}")
+        import traceback
+        traceback.print_exc()
+
+
+if __name__ == "__main__":
+    print("\nTesting Self-Reflection Function...")
+    print("="*60)
+    
+    if not os.getenv("OPENAI_API_KEY"):
+        print("OPENAI_API_KEY required")
+        exit(1)
+    
+    try:
+        agent = InvestmentResearchAgent()
+        
+        print("\nExecuting research...")
+        results = agent.execute_research("AAPL")
+        
+        print("\n" + "="*60)
+        print("Testing self_reflect() - Agent Function 3")
+        print("="*60)
+        
+        reflection = agent.self_reflect(results)
+        
+        print("\n" + "="*60)
+        print("SELF-REFLECTION RESULTS:")
+        print("="*60)
+        print(f"Overall Quality: {reflection['overall_quality_score']:.2f}/1.00")
+        
+        print("\nDimension Scores:")
+        for dim, score in reflection.get("dimension_scores", {}).items():
+            print(f"  {dim.capitalize()}: {score:.2f}")
+        
+        print("\nStrengths:")
+        for i, strength in enumerate(reflection.get("strengths", []), 1):
+            print(f"  {i}. {strength}")
+        
+        print("\nImprovements:")
+        for i, improvement in enumerate(reflection.get("improvement_suggestions", []), 1):
+            print(f"  {i}. {improvement}")
+        
+        print("\n" + "="*60)
+        print("Agent Function 3 (Self-Reflection): WORKING! ")
+        
+    except Exception as e:
+        print(f"\nError: {e}")
+    
+
+if __name__ == "__main__":
     print("\nTesting Complete Research Agent...")
     print("="*60)
     
     if not os.getenv("OPENAI_API_KEY"):
-        print("✗ OPENAI_API_KEY required")
+        print("OPENAI_API_KEY required")
         exit(1)
     
     try:
@@ -802,6 +802,7 @@ if __name__ == "__main__":
         print("  4. Learning (Memory) ")
         
     except Exception as e:
-        print(f"\n✗ Error: {e}")
+        print(f"\nError: {e}")
         import traceback
         traceback.print_exc()
+

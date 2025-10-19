@@ -1,0 +1,64 @@
+graph TB
+    subgraph "Multi-Agent System Coordination"
+        ORCH[Investment Research Agent<br/>Orchestrator]
+        
+        subgraph "Data Collection"
+            YF[Yahoo Finance]
+            AV[Alpha Vantage]
+            FRED[FRED]
+            SEC[SEC EDGAR]
+        end
+        
+        subgraph "Parallel Agent Execution"
+            MA[Market Data Agent<br/>Analyzes: Trends, Volatility]
+            FA[Fundamentals Agent<br/>Analyzes: Profit, Growth]
+            EA[Economic Agent<br/>Analyzes: Macro, Rates]
+            RA[Regulatory Agent<br/>Analyzes: Filings, Compliance]
+        end
+        
+        AGG[Results Aggregator]
+        
+        subgraph "Synthesis"
+            WF1[Prompt Chain<br/>Synthesis]
+            WF2[Quality Check<br/>Evaluator]
+        end
+        
+        FINAL[Comprehensive<br/>Research Report]
+    end
+    
+    LLM[OpenAI<br/>GPT-4o-mini]
+    
+    ORCH --> YF
+    ORCH --> AV
+    ORCH --> FRED
+    ORCH --> SEC
+    
+    YF --> MA
+    YF --> FA
+    AV --> FA
+    FRED --> EA
+    SEC --> RA
+    
+    MA -.Uses LLM.-> LLM
+    FA -.Uses LLM.-> LLM
+    EA -.Uses LLM.-> LLM
+    
+    MA --> AGG
+    FA --> AGG
+    EA --> AGG
+    RA --> AGG
+    
+    AGG --> WF1
+    WF1 -.Uses LLM.-> LLM
+    WF1 --> WF2
+    WF2 -.Uses LLM.-> LLM
+    WF2 --> FINAL
+    
+    style ORCH fill:#e1f5ff
+    style MA fill:#ffe6f0
+    style FA fill:#ffe6f0
+    style EA fill:#ffe6f0
+    style RA fill:#e8eaf6
+    style LLM fill:#10a37f
+    style AGG fill:#fff4e6
+    style FINAL fill:#e8f5e9

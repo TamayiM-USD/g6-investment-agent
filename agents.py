@@ -59,15 +59,15 @@ class MarketDataAgent:
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are an expert market analyst. Provide analysis in valid JSON format."
+                        "content": "You are an expert market analyst. Provide analysis in valid JSON format. Ensure all string values are properly escaped and the JSON is syntactically correct."
                     },
                     {
                         "role": "user",
                         "content": market_prompt
                     }
                 ],
-                temperature=0.7,
-                max_tokens=500,
+                temperature=0.5,
+                max_tokens=1000,
                 response_format={"type": "json_object"}
             )
             
@@ -266,15 +266,15 @@ class FundamentalsAgent:
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are an expert fundamental analyst. Provide analysis in valid JSON format."
+                        "content": "You are an expert fundamental analyst. Provide analysis in valid JSON format. Ensure all string values are properly escaped and the JSON is syntactically correct."
                     },
                     {
                         "role": "user",
                         "content": prompt
                     }
                 ],
-                temperature=0.7,
-                max_tokens=500,
+                temperature=0.5,
+                max_tokens=1000,
                 response_format={"type": "json_object"}
             )
             
@@ -331,7 +331,7 @@ Earnings Growth: {earnings_growth:.2%} if earnings_growth else "N/A"
 FINANCIAL STRENGTH:
 Debt-to-Equity: {debt_to_equity}
 
-Provide JSON analysis:
+Provide valid JSON analysis:
 {{
     "profitability_assessment": "strong/moderate/weak with detailed explanation",
     "growth_potential": "high/moderate/low with reasoning and growth trajectory",
@@ -383,15 +383,15 @@ class EconomicContextAgent:
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are an expert macroeconomic analyst. Provide analysis in valid JSON format."
+                        "content": "You are an expert macroeconomic analyst. Provide analysis in valid JSON format. Ensure all string values are properly escaped and the JSON is syntactically correct."
                     },
                     {
                         "role": "user",
                         "content": prompt
                     }
                 ],
-                temperature=0.7,
-                max_tokens=500,
+                temperature=0.5,
+                max_tokens=1000,
                 response_format={"type": "json_object"}
             )
             
@@ -433,7 +433,7 @@ GDP Growth: {gdp_growth}
 
 TARGET SECTOR: {sector}
 
-Provide JSON analysis:
+Provide valid JSON analysis:
 {{
     "interest_rate_impact": "positive/negative/neutral with detailed explanation of rate effects on {sector}",
     "employment_impact": "analysis of how employment trends affect {sector} demand and operations",

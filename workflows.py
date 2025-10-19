@@ -182,7 +182,7 @@ if __name__ == "__main__":
     print("="*60)
     
     if not os.getenv("OPENAI_API_KEY"):
-        print("✗ OPENAI_API_KEY not set")
+        print("OPENAI_API_KEY not set")
         exit(1)
     
     try:
@@ -207,7 +207,7 @@ if __name__ == "__main__":
         print("Prompt Chain Workflow: WORKING! ")
         
     except Exception as e:
-        print(f"✗ Error: {e}")
+        print(f"Error: {e}")
 
 
 class RoutingWorkflow:
@@ -444,7 +444,7 @@ if __name__ == "__main__":
     print("="*60)
     
     if not os.getenv("OPENAI_API_KEY"):
-        print("✗ OPENAI_API_KEY not set")
+        print("OPENAI_API_KEY not set")
         exit(1)
     
     # Test Routing Workflow
@@ -469,7 +469,7 @@ if __name__ == "__main__":
         print("  Routing workflow working")
         
     except Exception as e:
-        print(f"  ✗ Error: {e}")
+        print(f"  Error: {e}")
     
     # Test Evaluator-Optimizer Workflow
     print("\n2. Testing Evaluator-Optimizer Workflow...")
@@ -489,7 +489,7 @@ if __name__ == "__main__":
         print("  Evaluator-optimizer working")
         
     except Exception as e:
-        print(f"  ✗ Error: {e}")
+        print(f"  Error: {e}")
     
     print("\n" + "="*60)
     print("ALL 3 WORKFLOW PATTERNS COMPLETE! ")

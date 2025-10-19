@@ -1,0 +1,13 @@
+sequenceDiagram
+    participant Q as Query
+    participant R as Router
+    participant L as LLM
+    participant A as Selected Agent
+    
+    Q->>R: "How profitable is Apple?"
+    R->>L: Analyze query intent
+    Note over L: LLM reasoning:<br/>Query asks about profitability<br/>→ Financial health<br/>→ Fundamentals Agent
+    L-->>R: Route to Fundamentals Agent<br/>Reasoning: Query focuses on profit
+    R->>A: Execute Fundamentals Agent
+    A-->>R: Analysis Result
+    R-->>Q: Result + Routing reasoning

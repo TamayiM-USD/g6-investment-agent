@@ -1,0 +1,34 @@
+graph LR
+    subgraph "Prompt Chain Workflow - 5 Steps"
+        INPUT[Raw Data<br/>Stock Symbol + Data]
+        
+        S1[Step 1:<br/>INGEST<br/>Receive raw data]
+        S2[Step 2:<br/>PREPROCESS<br/>Structure data]
+        S3[Step 3:<br/>CLASSIFY<br/>Categorize data types]
+        S4[Step 4:<br/>EXTRACT<br/>LLM extracts insights]
+        S5[Step 5:<br/>SUMMARIZE<br/>LLM creates summary]
+        
+        OUTPUT[Executive<br/>Summary]
+    end
+    
+    LLM[OpenAI<br/>GPT-4o-mini]
+    
+    INPUT --> S1
+    S1 --> S2
+    S2 --> S3
+    S3 --> S4
+    S4 -.LLM Call.-> LLM
+    LLM -.Insights.-> S4
+    S4 --> S5
+    S5 -.LLM Call.-> LLM
+    LLM -.Summary.-> S5
+    S5 --> OUTPUT
+    
+    style INPUT fill:#e3f2fd
+    style S1 fill:#fff
+    style S2 fill:#fff
+    style S3 fill:#fff
+    style S4 fill:#fff4e6
+    style S5 fill:#fff4e6
+    style OUTPUT fill:#e8f5e9
+    style LLM fill:#10a37f

@@ -1,0 +1,42 @@
+graph TB
+    subgraph "Routing Workflow"
+        QUERY[User Query\nWhat's the stock price trend?]
+        
+        ROUTER[Routing Engine<br/>LLM-Powered]
+        
+        subgraph "Available Agents"
+            MA[Market Data Agent<br/>Price, trends, volatility]
+            FA[Fundamentals Agent<br/>Profitability, growth]
+            EA[Economic Agent<br/>Macro conditions]
+            RA[Regulatory Agent<br/>SEC filings]
+        end
+        
+        DECISION{LLM Decision:<br/>Best Agent?}
+        
+        RESULT[Selected Agent<br/>+ Reasoning]
+    end
+    
+    LLM[OpenAI<br/>GPT-4o-mini]
+    
+    QUERY --> ROUTER
+    ROUTER -.Analyzes Query.-> LLM
+    LLM -.Routing Decision.-> ROUTER
+    ROUTER --> DECISION
+    DECISION -->|"Query about price"| MA
+    DECISION -->|"Query about profit"| FA
+    DECISION -->|"Query about economy"| EA
+    DECISION -->|"Query about filings"| RA
+    MA --> RESULT
+    FA --> RESULT
+    EA --> RESULT
+    RA --> RESULT
+    
+    style QUERY fill:#e3f2fd
+    style ROUTER fill:#fff4e6
+    style LLM fill:#10a37f
+    style DECISION fill:#fff9c4
+    style MA fill:#ffe6f0
+    style FA fill:#ffe6f0
+    style EA fill:#ffe6f0
+    style RA fill:#ffe6f0
+    style RESULT fill:#e8f5e9
