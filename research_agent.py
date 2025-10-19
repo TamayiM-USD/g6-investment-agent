@@ -9,6 +9,8 @@ from api_clients import YahooFinanceClient, AlphaVantageClient, FREDClient, SECE
 from agents import MarketDataAgent, FundamentalsAgent, EconomicContextAgent, RegulatoryAgent
 from workflows import PromptChainWorkflow, RoutingWorkflow, EvaluatorOptimizerWorkflow
 
+from dotenv import load_dotenv
+load_dotenv()  # take environment variables
 
 class InvestmentResearchAgent:
     """
@@ -42,13 +44,13 @@ class InvestmentResearchAgent:
         try:
             self.alpha_vantage = AlphaVantageClient()
         except ValueError:
-            print("    ⚠ Alpha Vantage API key not set (optional)")
+            print("    Alpha Vantage API key not set (optional)")
             self.alpha_vantage = None
         
         try:
             self.fred_client = FREDClient()
         except ValueError:
-            print("    ⚠ FRED API key not set (optional)")
+            print("    FRED API key not set (optional)")
             self.fred_client = None
         
         self.sec_client = SECEdgarClient()
@@ -241,7 +243,7 @@ Be specific and actionable. Focus on what makes {symbol} analysis unique.
                 company_overview = self.alpha_vantage.get_company_overview(symbol)
                 print(f"     Got company overview")
             except Exception as e:
-                print(f"     ⚠ Alpha Vantage skipped: {str(e)[:50]}")
+                print(f"     Alpha Vantage skipped: {str(e)[:50]}")
         
         # FRED (optional)
         fed_rate = None
@@ -253,14 +255,14 @@ Be specific and actionable. Focus on what makes {symbol} analysis unique.
                 unemployment = self.fred_client.get_economic_indicator("UNRATE", limit=3)
                 print(f"     Got economic data")
             except Exception as e:
-                print(f"     ⚠ FRED skipped: {str(e)[:50]}")
+                print(f"     FRED skipped: {str(e)[:50]}")
         
         print("  5. SEC EDGAR...")
         try:
             sec_filings = self.sec_client.get_company_submissions(symbol)
             print(f"     Got SEC filings (CIK: {sec_filings.get('cik', 'N/A')})")
         except Exception as e:
-            print(f"     ⚠ SEC data limited: {str(e)[:50]}")
+            print(f"     SEC data limited: {str(e)[:50]}")
             sec_filings = {"error": str(e)}
         
         # Prepare economic context
@@ -690,7 +692,11 @@ if __name__ == "__main__":
         
         print("\nAgent Analyses:")
         for agent_name, analysis in results['agent_analyses'].items():
-            print(f"  {agent_name}: {len(analysis.get('recommendations', []))} recommendations")
+            # Handle cases where analysis might be a boolean instead of a dict
+            if isinstance(analysis, dict):
+                print(f"  {agent_name}: {len(analysis.get('recommendations', []))} recommendations")
+            else:
+                print(f"  {agent_name}: Unexpected type {type(analysis).__name__} = {analysis}")
         
         print("\nWorkflow Results:")
         for workflow_name in results['workflow_results'].keys():

@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import copy
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 from openai import OpenAI
@@ -428,15 +429,18 @@ Rate on scale 0.0 to 1.0 and provide feedback in JSON:
     
     def _optimize_with_llm(self, analysis: Dict[str, Any], evaluation: Dict[str, Any]) -> Dict[str, Any]:
         """Apply LLM-suggested improvements"""
-        
+
         feedback = evaluation.get("feedback", [])
-        
+
+        # Create a copy to avoid modifying the original
+        optimized_analysis = copy.deepcopy(analysis)
+
         # Mark as optimized
-        analysis["optimized"] = True
-        analysis["optimization_round"] = analysis.get("optimization_round", 0) + 1
-        analysis["improvements_applied"] = feedback
-        
-        return analysis
+        optimized_analysis["optimized"] = True
+        optimized_analysis["optimization_round"] = optimized_analysis.get("optimization_round", 0) + 1
+        optimized_analysis["improvements_applied"] = feedback
+
+        return optimized_analysis
 
 
 if __name__ == "__main__":
